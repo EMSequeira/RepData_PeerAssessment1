@@ -8,11 +8,39 @@ output:
 
 ## Loading and preprocessing the data
 
+We will first initialize all the packages that we will need to be using.
+Then we can download and load in the data from the provided URL, as well as
+unzip it and have it ready for use. Before moving onto the next step, we will
+finish this section off by reading the csv data from the url file to our
+program. 
 
+```{r}
+library(knitr)
+library(data.table)
+library(ggplot2)
+
+fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+download.file(fileUrl, destfile = paste0(getwd(), '/repdata%2Fdata%2Factivity.zip')
+              , method = "curl")
+unzip("repdata%2Fdata%2Factivity.zip",exdir = "data")
+
+activityDT <- data.table::fread(input = "data/activity.csv")
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r}
+Total_Steps <- activityDT[, c(lapply(.SD, sum, na.rm = FALSE))
+                          , .SDcols = c("steps"), by = .(date)] 
+head(Total_Steps, 10)
 
+ggplot(Total_Steps, aes(x = steps)) +
+    geom_histogram(fill = "blue", binwidth = 1000) +
+    labs(title = "Daily Steps", x = "Steps", y = "Frequency")
+
+Total_Steps[, .(Mean_Steps = mean(steps, na.rm = TRUE)
+                , Median_Steps = median(steps, na.rm = TRUE))]
+```
 
 ## What is the average daily activity pattern?
 
