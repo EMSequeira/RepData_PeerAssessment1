@@ -29,6 +29,11 @@ activityDT <- data.table::fread(input = "data/activity.csv")
 
 ## What is mean total number of steps taken per day?
 
+We first calculate the total number of steps taken per day.
+Then, we create a histogram.
+Finally, we calcualte and report the mean and median of the number of steps
+per day.
+
 ```{r}
 Total_Steps <- activityDT[, c(lapply(.SD, sum, na.rm = FALSE))
                           , .SDcols = c("steps"), by = .(date)] 
@@ -43,6 +48,13 @@ Total_Steps[, .(Mean_Steps = mean(steps, na.rm = TRUE)
 ```
 
 ## What is the average daily activity pattern?
+
+We start off with making a time series plot with the specified 5 minute intervals.
+On the X axis, we have the time, and on Y we have the average number of daily
+steps. 
+
+We can use this to find which interval has the most steps, across the days counted
+in the dataset.
 
 ```{r}
 IntervalDT <- activityDT[, c(lapply(.SD, mean, na.rm = TRUE))
