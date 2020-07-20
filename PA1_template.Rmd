@@ -68,6 +68,17 @@ IntervalDT[steps == max(steps), .(max_interval = interval)]
 
 ## Imputing missing values
 
+First, we find the total number of missing values in the dataset, and then
+find a way to fill in the missing places with data.
+
+In this case, the missing value spots were filled with the median value for the
+steps of that particular day.
+
+Then we made a new dataset that is equal to the original, only now this one
+should not have any missing data.
+
+Finally, make a new histogram. 
+
 ```{r}
 nrow(activityDT[is.na(steps),])
 
@@ -86,4 +97,29 @@ ggplot(Total_Steps, aes(x = steps)) + geom_histogram(fill = "blue", binwidth = 1
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+We can begin by creating a new variable in the dataset which will have two levels,
+one for the weekdays, and one for the weekends. 
 
+With this done, we can then make a panel plot which will have the same 5 minute
+intervals and the average number of steps taken for the weekdays and the 
+weekends. 
+
+```{r}
+activityDT[, date := as.POSIXct(date, format = "%Y-%m-%d")]
+activityDT[, `Day of Week`:= weekdays(x = date)]
+activityDT[grepl(pattern = "Monday|Tuesday|Wednesday|Thursday|Friday"
+                 , x = `Day of Week`), "weekday or weekend"] <- "weekday"
+activityDT[grepl(pattern = "Saturday|Sunday", x = `Day of Week`)
+           , "weekday or weekend"] <- "weekend"
+activityDT[, `weekday or weekend` := as.factor(`weekday or weekend`)]
+head(activityDT, 10)
+
+activityDT[is.na(steps), "steps"] <- activityDT[, c(lapply(.SD, median, na.rm = TRUE))
+                                                , .SDcols = c("steps")]
+IntervalDT <- activityDT[, c(lapply(.SD, mean, na.rm = TRUE)), .SDcols = c("steps")
+                         , by = .(interval, `weekday or weekend`)] 
+ggplot(IntervalDT , aes(x = interval , y = steps, color=`weekday or weekend`)) + 
+        geom_line() + labs(title = "Avg. Daily Steps by Weektype"
+                           , x = "Interval", y = "No. of Steps") + 
+        facet_wrap(~`weekday or weekend` , ncol = 1, nrow=2)
+```
