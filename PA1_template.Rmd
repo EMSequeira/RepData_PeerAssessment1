@@ -56,6 +56,22 @@ IntervalDT[steps == max(steps), .(max_interval = interval)]
 
 ## Imputing missing values
 
+```{r}
+nrow(activityDT[is.na(steps),])
 
+activityDT[is.na(steps), "steps"] <- activityDT[, c(lapply(.SD, median, na.rm = TRUE))
+                                                , .SDcols = c("steps")]
+
+data.table::fwrite(x = activityDT, file = "data/tidyData.csv", quote = FALSE)
+
+Total_Steps <- activityDT[, c(lapply(.SD, sum)), .SDcols = c("steps"), by = .(date)]
+
+Total_Steps[, .(Mean_Steps = mean(steps), Median_Steps = median(steps))]
+
+ggplot(Total_Steps, aes(x = steps)) + geom_histogram(fill = "blue", binwidth = 1000) + 
+        labs(title = "Daily Steps", x = "Steps", y = "Frequency")
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
